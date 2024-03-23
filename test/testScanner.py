@@ -67,6 +67,12 @@ class TestScanner(unittest.TestCase):
         self.assertEqual(tokens[0].type, TokenType.PLUS)
         self.assertEqual(tokens[1].type, TokenType.EOF)
 
+    def test_string(self):
+        scanner = Scanner('"Hello"')
+        tokens = scanner.scanTokens()
+        self.assertEqual(tokens[0].literal, "Hello")
+        self.assertEqual(tokens[0].lexeme, '"Hello"')
+
 
 if __name__ == '__main__':
     unittest.main()
