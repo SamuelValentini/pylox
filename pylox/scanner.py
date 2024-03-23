@@ -1,6 +1,5 @@
-from token import TokenType
-from token import Token
-import lox
+from pylox.token import TokenType
+from pylox.token import Token
 
 class Scanner():
 
@@ -20,7 +19,9 @@ class Scanner():
             self.start = self.current
             self.scanToken()
 
-        self.tokens.append( Token( TokenType.EOF, "", self.line ))
+        self.tokens.append( Token( TokenType.EOF, "", None, self.line ))
+
+        return self.tokens
 
     def scanToken(self):
         c = self.advance()
@@ -45,15 +46,36 @@ class Scanner():
                 self.addToken(TokenType.SEMICOLON)
             case '*':
                 self.addToken(TokenType.STAR)
+            case '!':
+                self.addToken(TokenType.BANG_EQUAL) if self.match('=') else self.addToken(TokenType.BANG)
+            case '=':
+                self.addToken(TokenType.EQUAL_EQUAL) if self.match('=') else self.addToken(TokenType.EQUAL)
+            case '<':
+                self.addToken(TokenType.LESS_EQUAL) if self.match('=') else self.addToken(TokenType.LESS)
+            case '>':
+                self.addToken(TokenType.GREATER_EQUAL) if self.match('=') else self.addToken(TokenType.GREATER)
 
             case _:
-                lox.error(self.line, "Unexpected character.")
+                from pylox.lox import error
+                error(self.line, f"{c} Unexpected character.")
+
+
+    def match(self, c):
+        if self.isAtEnd():
+            return False
+
+        if self.source[self.current] != c:
+            return False
+
+        self.current += 1
+        return True
 
 
     def advance(self):
         self.current += 1
-        return self.source[self.current-1]
+        return self.source[self.current - 1]
 
     def addToken(self,type, literal=None):
         text = self.source[self.start:self.current]
         self.tokens.append(Token(type, text, literal, self.line))
+

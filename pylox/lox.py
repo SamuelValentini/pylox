@@ -1,4 +1,5 @@
 import sys
+from pylox.scanner import Scanner
 
 hadError = False
 
@@ -14,7 +15,7 @@ def main():
 
 def runFile(path):
     with open(path) as f:
-        program = f.readlines()
+        program = "".join(f.readlines())
 
     run(program)
 
@@ -32,6 +33,8 @@ def runPrompt():
 def run(source):
     scanner = Scanner(source)
     token = scanner.scanTokens()
+    for t in token:
+        print(t)
 
 def error(line, message):
     report(line, "", message)
