@@ -80,11 +80,15 @@ class Scanner():
             case '"':
                 self.string()
 
+
             #Manage Errors
             case _:
-                #Ugly but it breaks the circular dependency
-                from pylox.lox import error
-                error(self.line, f"{c} Unexpected character.")
+                if c.isdigit():
+                    self.number()
+                else:
+                    #Ugly but it breaks the circular dependency
+                    from pylox.lox import error
+                    error(self.line, f"{c} Unexpected character.")
 
 
     def match(self, c):
@@ -106,6 +110,11 @@ class Scanner():
             return '\0'
         return self.source[self.current]
 
+    def peekNext(self):
+        if self.current + 1 >= len(self.source):
+            return '\0'
+        return self.source[self.current + 1]
+
     def string(self):
         while(self.peek() != '"') and (not self.isAtEnd()):
             if self.peek() == '\n':
@@ -113,10 +122,32 @@ class Scanner():
 
             self.advance()
 
-        value = self.source[self.start + 1:self.current]
+        if self.isAtEnd():
+            from pylox.lox import error
+            error(self.line, "Unterminated string")
+            return None
+
+        #Closing
+        self.advance()
+
+        value = self.source[self.start + 1:self.current - 1]
         self.addToken(TokenType.STRING, literal=value)
 
+    def number(self):
+        while(self.peek().isdigit()):
+            self.advance()
+
+        if self.peek() == '.' and self.peekNext().isdigit():
+            self.advance()
+
+        while(self.peek().isdigit()):
+            self.advance()
+
+        value = float(self.source[self.start:self.current])
+        self.addToken(TokenType.NUMBER,literal=value)
+
+
     def addToken(self,type, literal=None):
-        text = self.source[self.start:self.current+1]
+        text = self.source[self.start:self.current]
         self.tokens.append(Token(type, text, literal, self.line))
 
