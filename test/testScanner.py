@@ -73,6 +73,26 @@ class TestScanner(unittest.TestCase):
         self.assertEqual(tokens[0].literal, "Hello")
         self.assertEqual(tokens[0].lexeme, '"Hello"')
 
+        with patch("pylox.lox.error") as mock_error:
+            scanner = Scanner('"Unterminated string')
+            tokens = scanner.scanTokens()
+            mock_error.assert_called_once_with(1, "Unterminated string")
+
+    def test_number(self):
+        scanner = Scanner("12.34+1")
+        tokens = scanner.scanTokens()
+        self.assertEqual(tokens[0].type, TokenType.NUMBER)
+        self.assertAlmostEqual(tokens[0].literal, 12.34)
+        self.assertEqual(tokens[0].lexeme, "12.34")
+
+        self.assertEqual(tokens[1].type, TokenType.PLUS)
+        self.assertEqual(tokens[1].lexeme, "+")
+
+        self.assertEqual(tokens[2].type, TokenType.NUMBER)
+        self.assertAlmostEqual(tokens[2].literal, 1)
+        self.assertEqual(tokens[2].lexeme, "1")
+
+
 
 if __name__ == '__main__':
     unittest.main()
