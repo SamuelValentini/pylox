@@ -35,6 +35,11 @@ class TestScanner(unittest.TestCase):
             tokens = scanner.scanTokens()
             mock_error.assert_called_once_with(1, "@ Unexpected character.")
 
+        with patch("pylox.lox.error") as mock_error:
+            scanner = Scanner("+\n@")
+            tokens = scanner.scanTokens()
+            mock_error.assert_called_once_with(2, "@ Unexpected character.")
+
     def test_slash(self):
         expected = [TokenType.SLASH, TokenType.MINUS, TokenType.EOF]
         scanner = Scanner("/ -")
@@ -51,6 +56,17 @@ class TestScanner(unittest.TestCase):
 
         self.assertEqual(len(tokens), 1)
         self.assertEqual(tokens[0].type, TokenType.EOF)
+
+    def test_multiLineComment(self):
+        with patch("pylox.lox.error") as mock_error:
+            scanner = Scanner("//@ this is a comment\n+")
+            tokens = scanner.scanTokens()
+            mock_error.assert_not_called
+
+        self.assertEqual(len(tokens), 2)
+        self.assertEqual(tokens[0].type, TokenType.PLUS)
+        self.assertEqual(tokens[1].type, TokenType.EOF)
+
 
 if __name__ == '__main__':
     unittest.main()
