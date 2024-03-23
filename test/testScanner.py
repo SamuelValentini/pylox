@@ -52,7 +52,7 @@ class TestScanner(unittest.TestCase):
         with patch("pylox.lox.error") as mock_error:
             scanner = Scanner("//@ this is a comment")
             tokens = scanner.scanTokens()
-            mock_error.assert_not_called
+            mock_error.assert_not_called()
 
         self.assertEqual(len(tokens), 1)
         self.assertEqual(tokens[0].type, TokenType.EOF)
@@ -79,18 +79,47 @@ class TestScanner(unittest.TestCase):
             mock_error.assert_called_once_with(1, "Unterminated string")
 
     def test_number(self):
-        scanner = Scanner("12.34+1")
+        scanner = Scanner("12.34/1")
         tokens = scanner.scanTokens()
         self.assertEqual(tokens[0].type, TokenType.NUMBER)
         self.assertAlmostEqual(tokens[0].literal, 12.34)
         self.assertEqual(tokens[0].lexeme, "12.34")
 
-        self.assertEqual(tokens[1].type, TokenType.PLUS)
-        self.assertEqual(tokens[1].lexeme, "+")
+        self.assertEqual(tokens[1].type, TokenType.SLASH)
+        self.assertEqual(tokens[1].lexeme, "/")
 
         self.assertEqual(tokens[2].type, TokenType.NUMBER)
         self.assertAlmostEqual(tokens[2].literal, 1)
         self.assertEqual(tokens[2].lexeme, "1")
+
+    def test_identifiers(self):
+        scanner = Scanner("varfun")
+        tokens = scanner.scanTokens()
+        self.assertEqual(tokens[0].type, TokenType.IDENTIFIER)
+
+        scanner = Scanner("var")
+        tokens = scanner.scanTokens()
+        self.assertEqual(tokens[0].type, TokenType.VAR)
+
+        scanner = Scanner("var fun")
+        tokens = scanner.scanTokens()
+        self.assertEqual(tokens[0].type, TokenType.VAR)
+        self.assertEqual(tokens[1].type, TokenType.FUN)
+
+    def test_multilineWithComments(self):
+        expected = [TokenType.VAR, TokenType.IDENTIFIER, TokenType.EQUAL,
+                    TokenType.NUMBER, TokenType.VAR, TokenType.IDENTIFIER, 
+                    TokenType.EQUAL, TokenType.STRING, TokenType.EOF]
+        scanner = Scanner('var x = 2 //This is a comment\nvar s = "Hello"')
+        tokens = scanner.scanTokens()
+        self.assertEqual(len(tokens), 9)
+
+        for token, expected in zip(tokens, expected):
+            self.assertEqual(token.type, expected)
+
+        self.assertEqual(tokens[3].literal, 2)
+        self.assertEqual(tokens[7].literal, "Hello")
+
 
 
 
