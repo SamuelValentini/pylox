@@ -3,6 +3,25 @@ from pylox.token import Token
 
 class Scanner():
 
+    keywords = {
+        "and" : TokenType.AND,
+        "class" : TokenType.CLASS,
+        "else" : TokenType.ELSE,
+        "false" : TokenType.FALSE,
+        "for" : TokenType.FOR,
+        "fun" : TokenType.FUN,
+        "if" : TokenType.IF,
+        "nil" : TokenType.NIL,
+        "or" : TokenType.OR,
+        "print" : TokenType.PRINT,
+        "return" : TokenType.RETURN,
+        "super" : TokenType.SUPER,
+        "this" : TokenType.THIS,
+        "true" : TokenType.TRUE,
+        "var" : TokenType.VAR,
+        "while" : TokenType.WHILE,
+    }
+
     def __init__(self,source):
         self.source = source
         self.tokens = []
@@ -61,7 +80,7 @@ class Scanner():
             #/ and Comments
             case '/':
                 if self.match('/'):
-                    while(self.peek() != '\n' and (not self.isAtEnd)):
+                    while(self.peek() != '\n' and (not self.isAtEnd())):
                         self.advance()
                 else:
                     self.addToken(TokenType.SLASH)
@@ -85,6 +104,8 @@ class Scanner():
             case _:
                 if c.isdigit():
                     self.number()
+                elif c.isalpha() or c == "_":
+                    self.identifier()
                 else:
                     #Ugly but it breaks the circular dependency
                     from pylox.lox import error
@@ -145,6 +166,18 @@ class Scanner():
 
         value = float(self.source[self.start:self.current])
         self.addToken(TokenType.NUMBER,literal=value)
+
+    def identifier(self):
+        while self.peek().isalnum():
+            self.advance()
+
+        text = self.source[self.start:self.current]
+        if text in self.keywords:
+            tokenType = self.keywords[text]
+        else:
+            tokenType = TokenType.IDENTIFIER
+
+        self.addToken(tokenType)
 
 
     def addToken(self,type, literal=None):
