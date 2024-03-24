@@ -1,116 +1,122 @@
-from pylox.token import TokenType
-from pylox.token import Token
+from token import TokenType
+from token import Token
 
-class Scanner():
 
+class Scanner:
     keywords = {
-        "and" : TokenType.AND,
-        "class" : TokenType.CLASS,
-        "else" : TokenType.ELSE,
-        "false" : TokenType.FALSE,
-        "for" : TokenType.FOR,
-        "fun" : TokenType.FUN,
-        "if" : TokenType.IF,
-        "nil" : TokenType.NIL,
-        "or" : TokenType.OR,
-        "print" : TokenType.PRINT,
-        "return" : TokenType.RETURN,
-        "super" : TokenType.SUPER,
-        "this" : TokenType.THIS,
-        "true" : TokenType.TRUE,
-        "var" : TokenType.VAR,
-        "while" : TokenType.WHILE,
+        "and": TokenType.AND,
+        "class": TokenType.CLASS,
+        "else": TokenType.ELSE,
+        "false": TokenType.FALSE,
+        "for": TokenType.FOR,
+        "fun": TokenType.FUN,
+        "if": TokenType.IF,
+        "nil": TokenType.NIL,
+        "or": TokenType.OR,
+        "print": TokenType.PRINT,
+        "return": TokenType.RETURN,
+        "super": TokenType.SUPER,
+        "this": TokenType.THIS,
+        "true": TokenType.TRUE,
+        "var": TokenType.VAR,
+        "while": TokenType.WHILE,
     }
 
-    def __init__(self,source):
+    def __init__(self, source, errorHandler):
         self.source = source
         self.tokens = []
         self.start = 0
         self.current = 0
         self.line = 1
+        self.errorHandler = errorHandler
 
     def isAtEnd(self):
         return self.current >= len(self.source)
 
     def scanTokens(self):
-
-        while(not self.isAtEnd()):
+        while not self.isAtEnd():
             self.start = self.current
             self.scanToken()
 
-        self.tokens.append( Token( TokenType.EOF, "", None, self.line ))
+        self.tokens.append(Token(TokenType.EOF, "", None, self.line))
 
         return self.tokens
 
     def scanToken(self):
         c = self.advance()
         match c:
-            #Single Character Lexemes
-            case '(':
+            # Single Character Lexemes
+            case "(":
                 self.addToken(TokenType.LEFT_PAREN)
-            case ')':
+            case ")":
                 self.addToken(TokenType.RIGHT_PAREN)
-            case '{':
+            case "{":
                 self.addToken(TokenType.LEFT_BRACE)
-            case '}':
+            case "}":
                 self.addToken(TokenType.RIGHT_BRACE)
-            case ',':
+            case ",":
                 self.addToken(TokenType.COMMA)
-            case '.':
+            case ".":
                 self.addToken(TokenType.DOT)
-            case '-':
+            case "-":
                 self.addToken(TokenType.MINUS)
-            case '+':
+            case "+":
                 self.addToken(TokenType.PLUS)
-            case ';':
+            case ";":
                 self.addToken(TokenType.SEMICOLON)
-            case '*':
+            case "*":
                 self.addToken(TokenType.STAR)
 
-            #Double Character Lexemes
-            case '!':
-                self.addToken(TokenType.BANG_EQUAL) if self.match('=') else self.addToken(TokenType.BANG)
-            case '=':
-                self.addToken(TokenType.EQUAL_EQUAL) if self.match('=') else self.addToken(TokenType.EQUAL)
-            case '<':
-                self.addToken(TokenType.LESS_EQUAL) if self.match('=') else self.addToken(TokenType.LESS)
-            case '>':
-                self.addToken(TokenType.GREATER_EQUAL) if self.match('=') else self.addToken(TokenType.GREATER)
+            # Double Character Lexemes
+            case "!":
+                self.addToken(TokenType.BANG_EQUAL) if self.match(
+                    "="
+                ) else self.addToken(TokenType.BANG)
+            case "=":
+                self.addToken(TokenType.EQUAL_EQUAL) if self.match(
+                    "="
+                ) else self.addToken(TokenType.EQUAL)
+            case "<":
+                self.addToken(TokenType.LESS_EQUAL) if self.match(
+                    "="
+                ) else self.addToken(TokenType.LESS)
+            case ">":
+                self.addToken(TokenType.GREATER_EQUAL) if self.match(
+                    "="
+                ) else self.addToken(TokenType.GREATER)
 
-            #/ and Comments
-            case '/':
-                if self.match('/'):
-                    while(self.peek() != '\n' and (not self.isAtEnd())):
+            # / and Comments
+            case "/":
+                if self.match("/"):
+                    while self.peek() != "\n" and (not self.isAtEnd()):
                         self.advance()
                 else:
                     self.addToken(TokenType.SLASH)
 
-            #Remove with spaces
-            case ' ':
+            # Remove with spaces
+            case " ":
                 pass
-            case '\r':
+            case "\r":
                 pass
-            case '\t':
+            case "\t":
                 pass
-            case '\n':
+            case "\n":
                 self.line += 1
 
-            #Strings
+            # Strings
             case '"':
                 self.string()
 
-
-            #Manage Errors
+            # Manage Errors
             case _:
                 if c.isdigit():
                     self.number()
                 elif c.isalpha() or c == "_":
                     self.identifier()
                 else:
-                    #Ugly but it breaks the circular dependency
-                    from pylox.lox import error
-                    error(self.line, f"{c} Unexpected character.")
+                    # Ugly but it breaks the circular dependency
 
+                    self.errorHandler.error(self.line, f"{c} Unexpected character.")
 
     def match(self, c):
         if self.isAtEnd():
@@ -128,50 +134,49 @@ class Scanner():
 
     def peek(self):
         if self.isAtEnd():
-            return '\0'
+            return "\0"
         return self.source[self.current]
 
     def peekNext(self):
         if self.current + 1 >= len(self.source):
-            return '\0'
+            return "\0"
         return self.source[self.current + 1]
 
     def string(self):
-        while(self.peek() != '"') and (not self.isAtEnd()):
-            if self.peek() == '\n':
+        while (self.peek() != '"') and (not self.isAtEnd()):
+            if self.peek() == "\n":
                 self.line += 1
 
             self.advance()
 
         if self.isAtEnd():
-            from pylox.lox import error
-            error(self.line, "Unterminated string")
+            self.errorHandler.error(self.line, "Unterminated string")
             return None
 
-        #Closing
+        # Closing
         self.advance()
 
-        value = self.source[self.start + 1:self.current - 1]
+        value = self.source[self.start + 1 : self.current - 1]
         self.addToken(TokenType.STRING, literal=value)
 
     def number(self):
-        while(self.peek().isdigit()):
+        while self.peek().isdigit():
             self.advance()
 
-        if self.peek() == '.' and self.peekNext().isdigit():
+        if self.peek() == "." and self.peekNext().isdigit():
             self.advance()
 
-        while(self.peek().isdigit()):
+        while self.peek().isdigit():
             self.advance()
 
-        value = float(self.source[self.start:self.current])
-        self.addToken(TokenType.NUMBER,literal=value)
+        value = float(self.source[self.start : self.current])
+        self.addToken(TokenType.NUMBER, literal=value)
 
     def identifier(self):
         while self.peek().isalnum():
             self.advance()
 
-        text = self.source[self.start:self.current]
+        text = self.source[self.start : self.current]
         if text in self.keywords:
             tokenType = self.keywords[text]
         else:
@@ -179,8 +184,6 @@ class Scanner():
 
         self.addToken(tokenType)
 
-
-    def addToken(self,type, literal=None):
-        text = self.source[self.start:self.current]
+    def addToken(self, type, literal=None):
+        text = self.source[self.start : self.current]
         self.tokens.append(Token(type, text, literal, self.line))
-
