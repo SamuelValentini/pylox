@@ -2,6 +2,7 @@ import sys
 from scanner import Scanner
 from parser import Parser
 from astPrinter import AstPrinter
+from interpreter import Interpreter
 from errorHandler import ErrorHandler
 
 
