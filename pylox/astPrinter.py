@@ -8,10 +8,10 @@ class AstPrinter(Visitor):
     def printExpr(self, expr):
         print(expr.accept(self))
 
-    def paranthesize(self, name, expressions):
+    def paranthesize(self, name, *args):
         builder = ["("]
         builder.append(name)
-        for expr in expressions:
+        for expr in args:
             builder.append(" ")
             builder.append(expr.accept(self))
 
@@ -21,11 +21,11 @@ class AstPrinter(Visitor):
 
     def visitBinaryExpr(self, expression):
         return self.paranthesize(
-            expression.operator.lexeme, [expression.left, expression.right]
+            expression.operator.lexeme, expression.left, expression.right
         )
 
     def visitGroupingExpr(self, expression):
-        return self.paranthesize("group", expression.expression)
+        return self.paranthesize("group", expression.expr)
 
     def visitLiteralExpr(self, expression):
         if expression.value is None:
