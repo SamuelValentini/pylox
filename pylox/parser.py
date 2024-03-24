@@ -1,11 +1,17 @@
-from pylox.token import TokenType
-import pylox.Expr as Expr
+from token import TokenType
+import Expr as Expr
 
 
-class parser:
-    def __init__(self, tokens):
+class ParseError(RuntimeError):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
+
+class Parser:
+    def __init__(self, tokens, errorHandler):
         self.tokens = tokens
         self.current = 0
+        self.errorHandler = errorHandler
 
     def match(self, *args):
         for token in args:
@@ -39,9 +45,48 @@ class parser:
         if self.check(tokenType):
             return self.advance()
         else:
-            from pylox.lox import error
+            self.error(self.peek(), message)
 
-            error(self.peek(), message)
+    def error(self, token, message):
+        if token.type == TokenType.EOF:
+            self.errorHandler.report(token.line, " at end", message)
+        else:
+            self.errorHandler.report(token.line, f" at ' {token.lexeme} ''", message)
+
+        raise ParseError(message)
+
+    def synchronize(self):
+        self.advance()
+
+        while not self.isAtEnd():
+            if self.previous().type == TokenType.SEMICOLON:
+                return
+
+            match self.peek().type:
+                case TokenType.CLASS:
+                    return None
+                case TokenType.FUN:
+                    return None
+                case TokenType.VAR:
+                    return None
+                case TokenType.FOR:
+                    return None
+                case TokenType.IF:
+                    return None
+                case TokenType.WHILE:
+                    return None
+                case TokenType.PRINT:
+                    return None
+                case TokenType.RETURN:
+                    return None
+
+            self.advance()
+
+    def parse(self):
+        try:
+            return self.expression()
+        except ParseError:
+            return None
 
     def expression(self):
         return self.equality()
@@ -111,3 +156,5 @@ class parser:
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return Expr.Grouping(expr)
+
+        self.error(self.peek(), "Expected expression.")
