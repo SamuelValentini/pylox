@@ -1,48 +1,56 @@
 import sys
-from pylox.scanner import Scanner
+from scanner import Scanner
+from parser import Parser
+from astPrinter import AstPrinter
+from errorHandler import ErrorHandler
 
-hadError = False
 
-def main():
-    if len(sys.argv) > 2:
-        print("Usage: pylox [script]")
-        quit()
-    elif len(sys.argv) == 2:
-        print(sys.argv[1])
-        runFile(sys.argv[1])
-    else:
-        runPrompt()
+class Lox:
+    def __init__(self) -> None:
+        self.errorHandler = ErrorHandler()
 
-def runFile(path):
-    with open(path) as f:
-        program = "".join(f.readlines())
-
-    run(program)
-
-    if(hadError):
-        quit()
-
-def runPrompt():
-    while(True):
-        line = input("> ")
-        if line == "":
+    def main(self):
+        if len(sys.argv) > 2:
+            print("Usage: pylox [script]")
             quit()
-        run(line)
-        hadError = False
+        elif len(sys.argv) == 2:
+            print(sys.argv[1])
+            self.runFile(sys.argv[1])
+        else:
+            self.runPrompt()
 
-def run(source):
-    scanner = Scanner(source)
-    token = scanner.scanTokens()
-    for t in token:
-        print(t)
+    def runFile(self, path):
+        with open(path) as f:
+            program = "".join(f.readlines())
 
-def error(line, message):
-    report(line, "", message)
+        self.run(program)
 
-def report(line, where, message):
-    print(f"line: {line}] Error {where}: {message}")
-    hadError = True
+        if self.errorHandler.hadError:
+            quit()
+
+    def runPrompt(self):
+        while True:
+            line = input("> ")
+            if line == "":
+                quit()
+            self.run(line)
+
+    def run(self, source):
+        scanner = Scanner(source, self.errorHandler)
+        tokens = scanner.scanTokens()
+
+        if self.errorHandler.hadError:
+            return
+
+        parser = Parser(tokens, self.errorHandler)
+        expression = parser.parse()
+
+        if self.errorHandler.hadError:
+            return
+
+        print(AstPrinter().printExpr(expression))
 
 
 if __name__ == "__main__":
-    main()
+    lox = Lox()
+    lox.main()
