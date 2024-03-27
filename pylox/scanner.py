@@ -1,5 +1,5 @@
-from token import TokenType
-from token import Token
+from pylox.token import TokenType
+from pylox.token import Token
 
 
 class Scanner:
@@ -115,7 +115,6 @@ class Scanner:
                     self.identifier()
                 else:
                     # Ugly but it breaks the circular dependency
-
                     self.errorHandler.error(self.line, f"{c} Unexpected character.")
 
     def match(self, c):
