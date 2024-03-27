@@ -1,5 +1,5 @@
-from token import TokenType
-import Expr as Expr
+from pylox.token import TokenType
+import pylox.Expr as Expr
 
 
 class ParseError(RuntimeError):
@@ -108,7 +108,7 @@ class Parser:
             TokenType.LESS_EQUAL,
         ):
             operator = self.previous()
-            right = self.term
+            right = self.term()
             expr = Expr.Binary(expr, operator, right)
         return expr
 
