@@ -58,6 +58,12 @@ class TestScanner(unittest.TestCase):
         for token, expected in zip(tokens, expected):
             self.assertEqual(token.type, expected)
 
+    def test_emptyString(self):
+        scanner = Scanner('" "', self.errorHandler)
+        emptyString = scanner.scanTokens()[0]
+        emptyString.lexeme
+        self.assertEqual(emptyString.lexeme, '" "')
+
     def test_comment(self):
         scanner = Scanner("//@ this is a comment", self.errorHandler)
         tokens = scanner.scanTokens()
