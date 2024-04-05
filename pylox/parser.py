@@ -1,5 +1,6 @@
-from pylox.token import TokenType
-import pylox.Expr as Expr
+from token import TokenType
+import Expr as Expr
+import Stmt as Stmt
 
 
 class ParseError(RuntimeError):
@@ -84,7 +85,10 @@ class Parser:
 
     def parse(self):
         try:
-            return self.expression()
+            statements = []
+            while not self.isAtEnd():
+                statements.append(self.statement())
+            return statements
         except ParseError:
             return None
 
@@ -158,3 +162,18 @@ class Parser:
             return Expr.Grouping(expr)
 
         self.error(self.peek(), "Expected expression.")
+
+    def printStatement(self):
+        value = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ';' after value")
+        return Stmt.Print(value)
+
+    def expressionStatement(self):
+        expr = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ';' after value")
+        return Stmt.Expression(expr)
+
+    def statement(self):
+        if self.match(TokenType.PRINT):
+            return self.printStatement()
+        return self.expressionStatement()
