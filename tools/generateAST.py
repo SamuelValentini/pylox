@@ -1,6 +1,3 @@
-from re import sub
-import sys
-
 exprAST = (
     "Expr",
     {
@@ -8,6 +5,14 @@ exprAST = (
         "Grouping": ("expr",),
         "Literal": ("value",),
         "Unary": ("operator", "right"),
+    },
+)
+
+stmtAST = (
+    "Stmt",
+    {
+        "Expression": ("expression",),
+        "Print": ("expression",),
     },
 )
 
@@ -35,18 +40,20 @@ def printSubclasses(subclasses, baseClassName, outFile):
         outFile.write(f"\n\n")
 
 
-def printVisitor(subclasses, baseClassName):
-    visitor = open("../pylox/visitor.py", "w")
+def printVisitor(subclasses, baseClassName, baseClass):
+    visitor = f"../pylox/{baseClass}Visitor.py"
+    visitor = open(visitor, "w")
     printImport(visitor)
-    visitor.write("class Visitor(ABC):\n")
+    visitor.write(f"class {baseClass}Visitor(ABC):\n")
     for subcl in subclasses:
         visitor.write("    @abstractmethod\n")
-        visitor.write(f"    def visit{subcl}{baseClassName}(self, expression):\n")
+        visitor.write(f"    def visit{subcl}{baseClassName}(self, stmt):\n")
         visitor.write("        pass\n\n")
 
 
 def createAST(ast, outFile):
-    outFile = open(outFile, "w")
+    outPath = f"../pylox/{outFile}.py"
+    outFile = open(outPath, "w")
     baseClass = ast[0]
     subclasses = ast[1]
 
@@ -55,7 +62,8 @@ def createAST(ast, outFile):
     printSubclasses(subclasses, baseClass, outFile)
     outFile.close()
 
-    printVisitor(subclasses, baseClass)
+    printVisitor(subclasses, baseClass, baseClass)
 
 
-createAST(exprAST, "../pylox/Expr.py")
+createAST(exprAST, "Expr")
+createAST(stmtAST, "Stmt")
