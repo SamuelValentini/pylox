@@ -1,5 +1,5 @@
-from pylox.token import TokenType
-from pylox.token import Token
+from token import TokenType
+from token import Token
 
 
 class Scanner:
