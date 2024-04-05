@@ -1,19 +1,19 @@
-import pylox.Expr
-from pylox.errorHandler import ErrorHandler
-from pylox.visitor import Visitor
-from pylox.token import TokenType
-from pylox.token import Token
+from Expr import Expr
+from errorHandler import ErrorHandler
+from ExprVisitor import ExprVisitor
+from StmtVisitor import StmtVisitor
+from token import TokenType
+from token import Token
 
 
-class Interpreter(Visitor):
+class Interpreter(ExprVisitor, StmtVisitor):
     def __init__(self, errorHandler):
         self.errorHandler = errorHandler
 
-    def interpret(self, expression):
+    def interpret(self, statements):
         try:
-            value = self.evaluate(expression)
-            print(self.stringify(value))
-            return value
+            for statement in statements:
+                self.execute(statement)
         except RuntimeError as error:
             self.errorHandler.runtimeError(error)
 
@@ -26,6 +26,9 @@ class Interpreter(Visitor):
                 return int(float(object))
         else:
             return str(object)
+
+    def execute(self, stmt):
+        stmt.accept(self)
 
     def evaluate(self, expression):
         return expression.accept(self)
@@ -105,6 +108,15 @@ class Interpreter(Visitor):
                 self.checkNumberOperand(expression.operator, right)
                 return -float(right)
 
+        return None
+
+    def visitExpressionStmt(self, stmt):
+        self.evaluate(stmt.expression)
+        return None
+
+    def visitPrintStmt(self, stmt):
+        value = self.evaluate(stmt.expression)
+        print(self.stringify(value))
         return None
 
 
