@@ -1,7 +1,6 @@
 import sys
 from scanner import Scanner
 from parser import Parser
-from astPrinter import AstPrinter
 from interpreter import Interpreter
 from errorHandler import ErrorHandler
 
@@ -49,12 +48,12 @@ class Lox:
             return
 
         parser = Parser(tokens, self.errorHandler)
-        expression = parser.parse()
+        statements = parser.parse()
 
         if self.errorHandler.hadError:
             return
 
-        self.interpreter.interpret(expression)
+        self.interpreter.interpret(statements)
 
 
 if __name__ == "__main__":
