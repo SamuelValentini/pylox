@@ -53,3 +53,13 @@ class Variable(Expr):
         return visitor.visitVariableExpr(self)
 
 
+class Assignment(Expr):
+
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+    def accept(self,visitor):
+        return visitor.visitAssignmentExpr(self)
+
+

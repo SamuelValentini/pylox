@@ -22,3 +22,7 @@ class ExprVisitor(ABC):
     def visitVariableExpr(self, stmt):
         pass
 
+    @abstractmethod
+    def visitAssignmentExpr(self, stmt):
+        pass
+

@@ -33,3 +33,12 @@ class Var(Stmt):
         return visitor.visitVarStmt(self)
 
 
+class Block(Stmt):
+
+    def __init__(self, statements):
+        self.statements = statements
+
+    def accept(self,visitor):
+        return visitor.visitBlockStmt(self)
+
+
