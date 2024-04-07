@@ -87,7 +87,7 @@ class Parser:
         try:
             statements = []
             while not self.isAtEnd():
-                statements.append(self.statement())
+                statements.append(self.declaration())
             return statements
         except ParseError:
             return None
@@ -156,6 +156,9 @@ class Parser:
         if self.match(TokenType.NIL):
             return Expr.Literal(None)
 
+        if self.match(TokenType.IDENTIFIER):
+            return Expr.Variable(self.previous())
+
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
@@ -172,6 +175,25 @@ class Parser:
         expr = self.expression()
         self.consume(TokenType.SEMICOLON, "Expect ';' after value")
         return Stmt.Expression(expr)
+
+    def varDeclaration(self):
+        name = self.consume(TokenType.IDENTIFIER, "Expect variable name")
+
+        initializer = None
+        if self.match(TokenType.EQUAL):
+            initializer = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expect ';' after value")
+        return Stmt.Var(name, initializer)
+
+    def declaration(self):
+        try:
+            if self.match(TokenType.VAR):
+                return self.varDeclaration()
+            return self.statement()
+        except ParseError:
+            self.synchronize()
+            return None
 
     def statement(self):
         if self.match(TokenType.PRINT):
