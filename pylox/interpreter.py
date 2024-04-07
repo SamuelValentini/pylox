@@ -156,6 +156,14 @@ class Interpreter(ExprVisitor, StmtVisitor):
         finally:
             self.environment = previousEnv
 
+    def visitIfStmt(self, stmt):
+        if self.isTruthy(self.evaluate(stmt.condition)):
+            self.execute(stmt.thenBranch)
+        elif stmt.elseBranch is not None:
+            self.execute(stmt.elseBranch)
+
+        return None
+
 
 if __name__ == "__main__":
     expression = Expr.Binary(
