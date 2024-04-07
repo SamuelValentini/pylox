@@ -18,3 +18,7 @@ class ExprVisitor(ABC):
     def visitUnaryExpr(self, stmt):
         pass
 
+    @abstractmethod
+    def visitVariableExpr(self, stmt):
+        pass
+

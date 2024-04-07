@@ -10,3 +10,7 @@ class StmtVisitor(ABC):
     def visitPrintStmt(self, stmt):
         pass
 
+    @abstractmethod
+    def visitVarStmt(self, stmt):
+        pass
+
