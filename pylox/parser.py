@@ -93,7 +93,22 @@ class Parser:
             return None
 
     def expression(self):
-        return self.equality()
+        return self.assignment()
+
+    def assignment(self):
+        expr = self.equality()
+
+        if self.match(TokenType.EQUAL):
+            equals = self.previous()
+            value = self.assignment()
+
+            if isinstance(expr, Expr.Variable):
+                name = expr.name
+                return Expr.Assignment(name, value)
+
+            self.errorHandler.error(equals, "Invalid assignment target.")
+
+        return expr
 
     def equality(self):
         expr = self.comparison()
@@ -195,7 +210,17 @@ class Parser:
             self.synchronize()
             return None
 
+    def block(self):
+        statements = []
+        while not self.check(TokenType.RIGHT_BRACE) and not self.isAtEnd():
+            statements.append(self.declaration())
+
+        self.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+        return statements
+
     def statement(self):
         if self.match(TokenType.PRINT):
             return self.printStatement()
+        if self.match(TokenType.LEFT_BRACE):
+            return Stmt.Block(self.block())
         return self.expressionStatement()
