@@ -20,6 +20,7 @@ stmtAST = (
             "initializer",
         ),
         "Block": ("statements",),
+        "If": ("condition", "thenBranch", "elseBranch"),
     },
 )
 

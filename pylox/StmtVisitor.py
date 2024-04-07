@@ -18,3 +18,7 @@ class StmtVisitor(ABC):
     def visitBlockStmt(self, stmt):
         pass
 
+    @abstractmethod
+    def visitIfStmt(self, stmt):
+        pass
+
