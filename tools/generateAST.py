@@ -6,6 +6,7 @@ exprAST = (
         "Literal": ("value",),
         "Unary": ("operator", "right"),
         "Variable": ("name",),
+        "Assignment": ("name", "value"),
     },
 )
 
@@ -18,6 +19,7 @@ stmtAST = (
             "name",
             "initializer",
         ),
+        "Block": ("statements",),
     },
 )
 
