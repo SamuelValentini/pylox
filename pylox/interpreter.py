@@ -100,6 +100,18 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
         return None
 
+    def visitLogicalExpr(self, expression):
+        left = self.evaluate(expression.left)
+        if expression.operator.type == TokenType.OR:
+            if self.isTruthy(left):
+                return left
+
+        elif expression.operator.type == TokenType.AND:
+            if not self.isTruthy(left):
+                return left
+
+        return self.evaluate(expression.right)
+
     def visitGroupingExpr(self, expression):
         return self.evaluate(expression.expr)
 
