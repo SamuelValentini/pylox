@@ -218,7 +218,22 @@ class Parser:
         self.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
         return statements
 
+    def ifStatement(self):
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after if")
+        expr = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition")
+
+        thenBranch = self.statement()
+        elseBranch = None
+
+        if self.match(TokenType.ELSE):
+            elseBranch = self.statement()
+
+        return Stmt.If(expr, thenBranch, elseBranch)
+
     def statement(self):
+        if self.match(TokenType.IF):
+            return self.ifStatement()
         if self.match(TokenType.PRINT):
             return self.printStatement()
         if self.match(TokenType.LEFT_BRACE):
