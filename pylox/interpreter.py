@@ -137,6 +137,25 @@ class Interpreter(ExprVisitor, StmtVisitor):
         self.environment.define(stmt.name.lexeme, value)
         return None
 
+    def visitAssignmentExpr(self, expression):
+        value = self.evaluate(expression.value)
+        self.environment.assign(expression.name, value)
+        return value
+
+    def visitBlockStmt(self, stmt):
+        self.executeBlock(stmt.statements, Environment(self.environment))
+        return None
+
+    def executeBlock(self, stmtList, environment):
+        previousEnv = self.environment
+        try:
+            self.environment = environment
+            for statement in stmtList:
+                self.execute(statement)
+
+        finally:
+            self.environment = previousEnv
+
 
 if __name__ == "__main__":
     expression = Expr.Binary(
