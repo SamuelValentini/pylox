@@ -15,6 +15,10 @@ class ExprVisitor(ABC):
         pass
 
     @abstractmethod
+    def visitLogicalExpr(self, stmt):
+        pass
+
+    @abstractmethod
     def visitUnaryExpr(self, stmt):
         pass
 

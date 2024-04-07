@@ -4,6 +4,7 @@ exprAST = (
         "Binary": ("left", "operator", "right"),
         "Grouping": ("expr",),
         "Literal": ("value",),
+        "Logical": ("left", "operator", "right"),
         "Unary": ("operator", "right"),
         "Variable": ("name",),
         "Assignment": ("name", "value"),
