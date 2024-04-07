@@ -5,6 +5,7 @@ exprAST = (
         "Grouping": ("expr",),
         "Literal": ("value",),
         "Unary": ("operator", "right"),
+        "Variable": ("name",),
     },
 )
 
@@ -13,6 +14,10 @@ stmtAST = (
     {
         "Expression": ("expression",),
         "Print": ("expression",),
+        "Var": (
+            "name",
+            "initializer",
+        ),
     },
 )
 
