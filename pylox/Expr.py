@@ -44,3 +44,12 @@ class Unary(Expr):
         return visitor.visitUnaryExpr(self)
 
 
+class Variable(Expr):
+
+    def __init__(self, name):
+        self.name = name
+
+    def accept(self,visitor):
+        return visitor.visitVariableExpr(self)
+
+
