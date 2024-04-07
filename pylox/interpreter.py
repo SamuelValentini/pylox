@@ -1,5 +1,6 @@
 from Expr import Expr
 from errorHandler import ErrorHandler
+from environment import Environment
 from ExprVisitor import ExprVisitor
 from StmtVisitor import StmtVisitor
 from token import TokenType
@@ -9,6 +10,7 @@ from token import Token
 class Interpreter(ExprVisitor, StmtVisitor):
     def __init__(self, errorHandler):
         self.errorHandler = errorHandler
+        self.environment = Environment()
 
     def interpret(self, statements):
         try:
@@ -115,6 +117,9 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
         return None
 
+    def visitVariableExpr(self, expression):
+        return self.environment.get(expression.name)
+
     def visitExpressionStmt(self, stmt):
         self.evaluate(stmt.expression)
         return None
@@ -122,6 +127,14 @@ class Interpreter(ExprVisitor, StmtVisitor):
     def visitPrintStmt(self, stmt):
         value = self.evaluate(stmt.expression)
         print(self.stringify(value))
+        return None
+
+    def visitVarStmt(self, stmt):
+        value = None
+        if stmt.initializer is not None:
+            value = self.evaluate(stmt.initializer)
+
+        self.environment.define(stmt.name.lexeme, value)
         return None
 
 
