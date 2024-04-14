@@ -2,6 +2,7 @@ exprAST = (
     "Expr",
     {
         "Binary": ("left", "operator", "right"),
+        "Call": ("callee", "paren", "arguments"),
         "Grouping": ("expr",),
         "Literal": ("value",),
         "Logical": ("left", "operator", "right"),
@@ -20,6 +21,7 @@ stmtAST = (
             "name",
             "initializer",
         ),
+        "While": ("condition", "body"),
         "Block": ("statements",),
         "If": ("condition", "thenBranch", "elseBranch"),
     },
