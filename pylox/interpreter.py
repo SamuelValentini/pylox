@@ -9,6 +9,8 @@ from token import Token
 
 import time
 
+from loxFunction import LoxFunction
+
 
 class Interpreter(ExprVisitor, StmtVisitor):
     def __init__(self, errorHandler):
@@ -150,6 +152,11 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def visitExpressionStmt(self, stmt):
         self.evaluate(stmt.expression)
+        return None
+
+    def visitFunctionStmt(self, stmt):
+        function = LoxFunction(stmt)
+        self.environment.define(stmt.name.lexeme, function)
         return None
 
     def visitPrintStmt(self, stmt):
