@@ -14,6 +14,17 @@ class Expression(Stmt):
         return visitor.visitExpressionStmt(self)
 
 
+class Function(Stmt):
+
+    def __init__(self, name, params, body):
+        self.name = name
+        self.params = params
+        self.body = body
+
+    def accept(self,visitor):
+        return visitor.visitFunctionStmt(self)
+
+
 class Print(Stmt):
 
     def __init__(self, expression):

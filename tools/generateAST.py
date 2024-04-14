@@ -16,6 +16,7 @@ stmtAST = (
     "Stmt",
     {
         "Expression": ("expression",),
+        "Function": ("name", "params", "body"),
         "Print": ("expression",),
         "Var": (
             "name",
