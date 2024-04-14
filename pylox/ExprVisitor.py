@@ -7,6 +7,10 @@ class ExprVisitor(ABC):
         pass
 
     @abstractmethod
+    def visitCallExpr(self, stmt):
+        pass
+
+    @abstractmethod
     def visitGroupingExpr(self, stmt):
         pass
 

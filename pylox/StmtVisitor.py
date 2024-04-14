@@ -15,6 +15,10 @@ class StmtVisitor(ABC):
         pass
 
     @abstractmethod
+    def visitWhileStmt(self, stmt):
+        pass
+
+    @abstractmethod
     def visitBlockStmt(self, stmt):
         pass
 

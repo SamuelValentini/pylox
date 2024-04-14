@@ -33,6 +33,16 @@ class Var(Stmt):
         return visitor.visitVarStmt(self)
 
 
+class While(Stmt):
+
+    def __init__(self, condition, body):
+        self.condition = condition
+        self.body = body
+
+    def accept(self,visitor):
+        return visitor.visitWhileStmt(self)
+
+
 class Block(Stmt):
 
     def __init__(self, statements):
