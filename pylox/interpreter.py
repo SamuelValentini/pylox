@@ -3,14 +3,30 @@ from errorHandler import ErrorHandler
 from environment import Environment
 from ExprVisitor import ExprVisitor
 from StmtVisitor import StmtVisitor
+from loxCallable import LoxCallable
 from token import TokenType
 from token import Token
+
+import time
 
 
 class Interpreter(ExprVisitor, StmtVisitor):
     def __init__(self, errorHandler):
         self.errorHandler = errorHandler
-        self.environment = Environment()
+        self.globals = Environment()
+        self.environment = self.globals
+
+        class Clock(LoxCallable):
+            def arity(self):
+                return 0
+
+            def call(self, interpreter, arguments):
+                return time.time()
+
+            def __str__(self):
+                return "<native fn>"
+
+        self.globals.define("clock", Clock())
 
     def interpret(self, statements):
         try:
@@ -175,6 +191,30 @@ class Interpreter(ExprVisitor, StmtVisitor):
             self.execute(stmt.elseBranch)
 
         return None
+
+    def visitWhileStmt(self, stmt):
+        while self.isTruthy(self.evaluate(stmt.condition)):
+            self.execute(stmt.body)
+
+        return None
+
+    def visitCallExpr(self, expr):
+        callee = self.evaluate(expr.callee)
+        arguments = []
+        for argument in expr.arguments:
+            arguments.append(self.evaluate(argument))
+
+        if not isinstance(callee, LoxCallable):
+            raise RuntimeError(expr.paren, "Can only call functions and classes.")
+
+        function = callee
+        if len(arguments) != function.arity():
+            raise RuntimeError(
+                expr.paren,
+                f"Expected {function.arity()} arguments but got {len(arguments)}.",
+            )
+
+        return function.call(self, arguments)
 
 
 if __name__ == "__main__":

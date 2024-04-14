@@ -171,7 +171,31 @@ class Parser:
             right = self.unary()
             return Expr.Unary(operator, right)
 
-        return self.primary()
+        return self.call()
+
+    def call(self):
+        expr = self.primary()
+
+        while True:
+            if self.match(TokenType.LEFT_PAREN):
+                expr = self.finishCall(expr)
+            else:
+                break
+
+        return expr
+
+    def finishCall(self, callee):
+        arguments = []
+        if not self.check(TokenType.RIGHT_PAREN):
+            arguments.append(self.expression)
+            while self.match(TokenType.COMMA):
+                if len(arguments) >= 255:
+                    self.error(self.peek(), "Can't have more than 255 arguments.")
+                arguments.append(self.expression)
+
+        paren = self.consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments")
+
+        return Expr.Call(callee, paren, arguments)
 
     def primary(self):
         if self.match(TokenType.NUMBER):
@@ -249,11 +273,56 @@ class Parser:
 
         return Stmt.If(expr, thenBranch, elseBranch)
 
+    def whileStatement(self):
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after if")
+        expr = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition")
+        body = self.statement()
+        return Stmt.While(expr, body)
+
+    def forStatement(self):
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after if")
+        if self.match(TokenType.SEMICOLON):
+            initializer = None
+        elif self.match(TokenType.VAR):
+            initializer = self.varDeclaration()
+        else:
+            initializer = self.expressionStatement()
+
+        condition = None
+        if not self.check(TokenType.SEMICOLON):
+            condition = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ';' after loop condition")
+
+        increment = None
+        if not self.check(TokenType.RIGHT_PAREN):
+            increment = self.expression()
+
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses")
+
+        body = self.statement()
+
+        if increment is not None:
+            body = Stmt.Block([body, Stmt.Expression(increment)])
+
+        if condition is None:
+            condition = Expr.Literal(True)
+        body = Stmt.While(condition, body)
+
+        if initializer is not None:
+            body = Stmt.Block([initializer, body])
+
+        return body
+
     def statement(self):
         if self.match(TokenType.IF):
             return self.ifStatement()
         if self.match(TokenType.PRINT):
             return self.printStatement()
+        if self.match(TokenType.WHILE):
+            return self.whileStatement()
+        if self.match(TokenType.FOR):
+            return self.forStatement()
         if self.match(TokenType.LEFT_BRACE):
             return Stmt.Block(self.block())
         return self.expressionStatement()
