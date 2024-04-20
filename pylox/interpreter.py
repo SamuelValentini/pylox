@@ -63,14 +63,16 @@ class Interpreter(ExprVisitor, StmtVisitor):
     def isTruthy(self, value):
         if value is None:
             return False
-        return bool(value)
+        if isinstance(value, bool):
+            return bool(value)
+        return True
 
     def isEqual(self, a, b):
         if a is None and b is None:
             return True
         if a is None:
             return False
-        return a == b
+        return a is b
 
     def checkNumberOperand(self, operator, operand, other=1.0):
         # Hacky way! In this way you can use the same function
