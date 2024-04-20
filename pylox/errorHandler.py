@@ -7,7 +7,7 @@ class ErrorHandler:
         self.report(line, "", message)
 
     def report(self, line, where, message):
-        print(f"line: {line}] Error {where}: {message}")
+        print(f"[{line}] Error {where}: {message}")
         self.hadError = True
 
     def runtimeError(self, error):
