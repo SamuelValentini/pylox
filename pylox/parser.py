@@ -52,7 +52,7 @@ class Parser:
         if token.type == TokenType.EOF:
             self.errorHandler.report(token.line, " at end", message)
         else:
-            self.errorHandler.report(token.line, f" at ' {token.lexeme} ''", message)
+            self.errorHandler.report(token.line, f" at '{token.lexeme}'", message)
 
         raise ParseError(message)
 
@@ -225,26 +225,26 @@ class Parser:
 
     def printStatement(self):
         value = self.expression()
-        self.consume(TokenType.SEMICOLON, "Expect ';' after value")
+        self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return Stmt.Print(value)
 
     def expressionStatement(self):
         expr = self.expression()
-        self.consume(TokenType.SEMICOLON, "Expect ';' after value")
+        self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return Stmt.Expression(expr)
 
     def varDeclaration(self):
-        name = self.consume(TokenType.IDENTIFIER, "Expect variable name")
+        name = self.consume(TokenType.IDENTIFIER, "Expect variable name.")
 
         initializer = None
         if self.match(TokenType.EQUAL):
             initializer = self.expression()
 
-        self.consume(TokenType.SEMICOLON, "Expect ';' after value")
+        self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return Stmt.Var(name, initializer)
 
     def function(self, kind):
-        name = self.consume(TokenType.IDENTIFIER, f"Expect {kind} name")
+        name = self.consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
         self.consume(TokenType.LEFT_PAREN, f"Expect '(' after {kind} name.")
         parameters = []
         if not self.check(TokenType.RIGHT_PAREN):
@@ -285,9 +285,9 @@ class Parser:
         return statements
 
     def ifStatement(self):
-        self.consume(TokenType.LEFT_PAREN, "Expect '(' after if")
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after if.")
         expr = self.expression()
-        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition")
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
 
         thenBranch = self.statement()
         elseBranch = None
@@ -298,14 +298,14 @@ class Parser:
         return Stmt.If(expr, thenBranch, elseBranch)
 
     def whileStatement(self):
-        self.consume(TokenType.LEFT_PAREN, "Expect '(' after if")
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after if.")
         expr = self.expression()
-        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition")
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
         body = self.statement()
         return Stmt.While(expr, body)
 
     def forStatement(self):
-        self.consume(TokenType.LEFT_PAREN, "Expect '(' after if")
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after if.")
         if self.match(TokenType.SEMICOLON):
             initializer = None
         elif self.match(TokenType.VAR):
@@ -316,13 +316,13 @@ class Parser:
         condition = None
         if not self.check(TokenType.SEMICOLON):
             condition = self.expression()
-        self.consume(TokenType.SEMICOLON, "Expect ';' after loop condition")
+        self.consume(TokenType.SEMICOLON, "Expect ';' after loop condition.")
 
         increment = None
         if not self.check(TokenType.RIGHT_PAREN):
             increment = self.expression()
 
-        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses")
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.")
 
         body = self.statement()
 
