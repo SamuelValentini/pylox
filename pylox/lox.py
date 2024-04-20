@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import sys
 from scanner import Scanner
 from parser import Parser
@@ -15,7 +16,6 @@ class Lox:
             print("Usage: pylox [script]")
             quit()
         elif len(sys.argv) == 2:
-            print(sys.argv[1])
             self.runFile(sys.argv[1])
         else:
             self.runPrompt()
