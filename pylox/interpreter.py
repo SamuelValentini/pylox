@@ -44,6 +44,8 @@ class Interpreter(ExprVisitor, StmtVisitor):
             object = str(object)
             if object.endswith(".0"):
                 return int(float(object))
+            else:
+                return object
         elif isinstance(object, bool):
             if object:
                 return "true"
