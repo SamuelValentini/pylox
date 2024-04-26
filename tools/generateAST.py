@@ -18,6 +18,7 @@ stmtAST = (
         "Expression": ("expression",),
         "Function": ("name", "params", "body"),
         "Print": ("expression",),
+        "Return": ("keyword", "value"),
         "Var": (
             "name",
             "initializer",

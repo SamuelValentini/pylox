@@ -1,11 +1,11 @@
 from Expr import Expr
-from errorHandler import ErrorHandler
 from environment import Environment
 from ExprVisitor import ExprVisitor
 from StmtVisitor import StmtVisitor
 from loxCallable import LoxCallable
 from token import TokenType
 from token import Token
+from Return import ReturnValue
 
 import time
 
@@ -159,7 +159,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
         return None
 
     def visitFunctionStmt(self, stmt):
-        function = LoxFunction(stmt)
+        function = LoxFunction(stmt, self.environment)
         self.environment.define(stmt.name.lexeme, function)
         return None
 
@@ -167,6 +167,13 @@ class Interpreter(ExprVisitor, StmtVisitor):
         value = self.evaluate(stmt.expression)
         print(self.stringify(value))
         return None
+
+    def visitReturnStmt(self, stmt):
+        value = None
+        if stmt.value is not None:
+            value = self.evaluate(stmt.value)
+
+        raise ReturnValue(value)
 
     def visitVarStmt(self, stmt):
         value = None

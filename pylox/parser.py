@@ -228,6 +228,15 @@ class Parser:
         self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return Stmt.Print(value)
 
+    def returnStatement(self):
+        keyword = self.previous()
+        value = None
+        if not self.check(TokenType.SEMICOLON):
+            value = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+        return Stmt.Return(keyword, value)
+
     def expressionStatement(self):
         expr = self.expression()
         self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
@@ -343,6 +352,8 @@ class Parser:
             return self.ifStatement()
         if self.match(TokenType.PRINT):
             return self.printStatement()
+        if self.match(TokenType.RETURN):
+            return self.returnStatement()
         if self.match(TokenType.WHILE):
             return self.whileStatement()
         if self.match(TokenType.FOR):
