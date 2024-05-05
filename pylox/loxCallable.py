@@ -3,7 +3,7 @@ from abc import abstractmethod
 
 
 class LoxCallable:
-    @property
+    @abstractmethod
     def arity(self):
         pass
 
