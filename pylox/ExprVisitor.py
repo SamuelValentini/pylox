@@ -3,34 +3,34 @@ from abc import abstractmethod
 
 class ExprVisitor(ABC):
     @abstractmethod
-    def visitBinaryExpr(self, stmt):
+    def visitBinaryExpr(self, expr):
         pass
 
     @abstractmethod
-    def visitCallExpr(self, stmt):
+    def visitCallExpr(self, expr):
         pass
 
     @abstractmethod
-    def visitGroupingExpr(self, stmt):
+    def visitGroupingExpr(self, expr):
         pass
 
     @abstractmethod
-    def visitLiteralExpr(self, stmt):
+    def visitLiteralExpr(self, expr):
         pass
 
     @abstractmethod
-    def visitLogicalExpr(self, stmt):
+    def visitLogicalExpr(self, expr):
         pass
 
     @abstractmethod
-    def visitUnaryExpr(self, stmt):
+    def visitUnaryExpr(self, expr):
         pass
 
     @abstractmethod
-    def visitVariableExpr(self, stmt):
+    def visitVariableExpr(self, expr):
         pass
 
     @abstractmethod
-    def visitAssignmentExpr(self, stmt):
+    def visitAssignmentExpr(self, expr):
         pass
 

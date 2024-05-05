@@ -60,7 +60,9 @@ def printVisitor(subclasses, baseClassName, baseClass):
     visitor.write(f"class {baseClass}Visitor(ABC):\n")
     for subcl in subclasses:
         visitor.write("    @abstractmethod\n")
-        visitor.write(f"    def visit{subcl}{baseClassName}(self, stmt):\n")
+        visitor.write(
+            f"    def visit{subcl}{baseClassName}(self, {baseClass.lower()}):\n"
+        )
         visitor.write("        pass\n\n")
 
 
