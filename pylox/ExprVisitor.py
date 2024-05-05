@@ -11,6 +11,10 @@ class ExprVisitor(ABC):
         pass
 
     @abstractmethod
+    def visitGetExpr(self, expr):
+        pass
+
+    @abstractmethod
     def visitGroupingExpr(self, expr):
         pass
 
@@ -20,6 +24,14 @@ class ExprVisitor(ABC):
 
     @abstractmethod
     def visitLogicalExpr(self, expr):
+        pass
+
+    @abstractmethod
+    def visitSetExpr(self, expr):
+        pass
+
+    @abstractmethod
+    def visitThisExpr(self, expr):
         pass
 
     @abstractmethod

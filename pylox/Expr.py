@@ -27,6 +27,16 @@ class Call(Expr):
         return visitor.visitCallExpr(self)
 
 
+class Get(Expr):
+
+    def __init__(self, obj, name):
+        self.obj = obj
+        self.name = name
+
+    def accept(self,visitor):
+        return visitor.visitGetExpr(self)
+
+
 class Grouping(Expr):
 
     def __init__(self, expr):
@@ -54,6 +64,26 @@ class Logical(Expr):
 
     def accept(self,visitor):
         return visitor.visitLogicalExpr(self)
+
+
+class Set(Expr):
+
+    def __init__(self, obj, name, value):
+        self.obj = obj
+        self.name = name
+        self.value = value
+
+    def accept(self,visitor):
+        return visitor.visitSetExpr(self)
+
+
+class This(Expr):
+
+    def __init__(self, keyword):
+        self.keyword = keyword
+
+    def accept(self,visitor):
+        return visitor.visitThisExpr(self)
 
 
 class Unary(Expr):

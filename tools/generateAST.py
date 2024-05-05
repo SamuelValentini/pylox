@@ -3,9 +3,12 @@ exprAST = (
     {
         "Binary": ("left", "operator", "right"),
         "Call": ("callee", "paren", "arguments"),
+        "Get": ("obj", "name"),
         "Grouping": ("expr",),
         "Literal": ("value",),
         "Logical": ("left", "operator", "right"),
+        "Set": ("obj", "name", "value"),
+        "This": ("keyword",),
         "Unary": ("operator", "right"),
         "Variable": ("name",),
         "Assignment": ("name", "value"),
@@ -25,6 +28,7 @@ stmtAST = (
         ),
         "While": ("condition", "body"),
         "Block": ("statements",),
+        "Class": ("name", "methods"),
         "If": ("condition", "thenBranch", "elseBranch"),
     },
 )
