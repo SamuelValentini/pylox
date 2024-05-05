@@ -17,6 +17,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
         self.errorHandler = errorHandler
         self.globals = Environment()
         self.environment = self.globals
+        self.locals = {}
 
         class Clock(LoxCallable):
             def arity(self):
@@ -57,6 +58,9 @@ class Interpreter(ExprVisitor, StmtVisitor):
     def execute(self, stmt):
         stmt.accept(self)
 
+    def resolve(self, expr, depth):
+        self.locals[expr] = depth
+
     def evaluate(self, expression):
         return expression.accept(self)
 
@@ -81,39 +85,39 @@ class Interpreter(ExprVisitor, StmtVisitor):
             return
         raise RuntimeError(operator, "Operand must be a number")
 
-    def visitBinaryExpr(self, expression):
-        left = self.evaluate(expression.left)
-        right = self.evaluate(expression.right)
-        match expression.operator.type:
+    def visitBinaryExpr(self, expr):
+        left = self.evaluate(expr.left)
+        right = self.evaluate(expr.right)
+        match expr.operator.type:
             case TokenType.PLUS:
                 if (isinstance(left, float) and isinstance(right, float)) or (
                     isinstance(left, str) and isinstance(right, str)
                 ):
                     return left + right
                 raise RuntimeError(
-                    expression.operator, "Operands must be two numbers or two strings."
+                    expr.operator, "Operands must be two numbers or two strings."
                 )
 
             case TokenType.MINUS:
-                self.checkNumberOperand(expression.operator, left, right)
+                self.checkNumberOperand(expr.operator, left, right)
                 return float(left) - float(right)
             case TokenType.SLASH:
-                self.checkNumberOperand(expression.operator, left, right)
+                self.checkNumberOperand(expr.operator, left, right)
                 return float(left) / float(right)
             case TokenType.STAR:
-                self.checkNumberOperand(expression.operator, left, right)
+                self.checkNumberOperand(expr.operator, left, right)
                 return float(left) * float(right)
             case TokenType.GREATER:
-                self.checkNumberOperand(expression.operator, left, right)
+                self.checkNumberOperand(expr.operator, left, right)
                 return float(left) > float(right)
             case TokenType.GREATER_EQUAL:
-                self.checkNumberOperand(expression.operator, left, right)
+                self.checkNumberOperand(expr.operator, left, right)
                 return float(left) >= float(right)
             case TokenType.LESS:
-                self.checkNumberOperand(expression.operator, left, right)
+                self.checkNumberOperand(expr.operator, left, right)
                 return float(left) < float(right)
             case TokenType.LESS_EQUAL:
-                self.checkNumberOperand(expression.operator, left, right)
+                self.checkNumberOperand(expr.operator, left, right)
                 return float(left) <= float(right)
             case TokenType.BANG_EQUAL:
                 return not self.isEqual(left, right)
@@ -122,37 +126,44 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
         return None
 
-    def visitLogicalExpr(self, expression):
-        left = self.evaluate(expression.left)
-        if expression.operator.type == TokenType.OR:
+    def visitLogicalExpr(self, expr):
+        left = self.evaluate(expr.left)
+        if expr.operator.type == TokenType.OR:
             if self.isTruthy(left):
                 return left
 
-        elif expression.operator.type == TokenType.AND:
+        elif expr.operator.type == TokenType.AND:
             if not self.isTruthy(left):
                 return left
 
-        return self.evaluate(expression.right)
+        return self.evaluate(expr.right)
 
-    def visitGroupingExpr(self, expression):
-        return self.evaluate(expression.expr)
+    def visitGroupingExpr(self, expr):
+        return self.evaluate(expr.expr)
 
-    def visitLiteralExpr(self, expression):
-        return expression.value
+    def visitLiteralExpr(self, expr):
+        return expr.value
 
-    def visitUnaryExpr(self, expression):
-        right = self.evaluate(expression.right)
-        match expression.operator.type:
+    def visitUnaryExpr(self, expr):
+        right = self.evaluate(expr.right)
+        match expr.operator.type:
             case TokenType.BANG:
                 return not self.isTruthy(right)
             case TokenType.MINUS:
-                self.checkNumberOperand(expression.operator, right)
+                self.checkNumberOperand(expr.operator, right)
                 return -float(right)
 
         return None
 
-    def visitVariableExpr(self, expression):
-        return self.environment.get(expression.name)
+    def visitVariableExpr(self, expr):
+        return self.lookUpVariable(expr.name, expr)
+
+    def lookUpVariable(self, name, expr):
+        try:
+            distance = self.locals[expr]
+            return self.environment.getAt(distance, name.lexeme)
+        except KeyError:
+            return self.globals.get(name)
 
     def visitExpressionStmt(self, stmt):
         self.evaluate(stmt.expression)
@@ -183,9 +194,14 @@ class Interpreter(ExprVisitor, StmtVisitor):
         self.environment.define(stmt.name.lexeme, value)
         return None
 
-    def visitAssignmentExpr(self, expression):
-        value = self.evaluate(expression.value)
-        self.environment.assign(expression.name, value)
+    def visitAssignmentExpr(self, expr):
+        value = self.evaluate(expr.value)
+        try:
+            distance = self.locals[expr]
+            self.environment.assignAt(distance, expr.name, value)
+        except KeyError:
+            self.globals.assign(expr.name, value)
+
         return value
 
     def visitBlockStmt(self, stmt):
@@ -233,24 +249,3 @@ class Interpreter(ExprVisitor, StmtVisitor):
             )
 
         return function.call(self, arguments)
-
-
-if __name__ == "__main__":
-    expression = Expr.Binary(
-        Expr.Literal(1.0),
-        Token(TokenType.PLUS, "+", None, 1),
-        Expr.Binary(
-            Expr.Literal(5.0), Token(TokenType.SLASH, "/", None, 1), Expr.Literal(2.0)
-        ),
-    )
-
-    expression = Expr.Binary(
-        Expr.Literal("HELLO"),
-        Token(TokenType.GREATER, "-", None, 1),
-        Expr.Literal("WORLD"),
-    )
-
-    expression = Expr.Unary(Token(TokenType.MINUS, "-", None, 1), Expr.Literal("HELLO"))
-
-    printer = Interpreter()
-    print(printer.evaluate(expression))
