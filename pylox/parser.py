@@ -105,6 +105,9 @@ class Parser:
             if isinstance(expr, Expr.Variable):
                 name = expr.name
                 return Expr.Assignment(name, value)
+            elif isinstance(expr, Expr.Get):
+                get = expr
+                return Expr.Set(get.obj, get.name, value)
 
             self.errorHandler.error(equals, "Invalid assignment target.")
 
@@ -179,6 +182,11 @@ class Parser:
         while True:
             if self.match(TokenType.LEFT_PAREN):
                 expr = self.finishCall(expr)
+            elif self.match(TokenType.DOT):
+                name = self.consume(
+                    TokenType.IDENTIFIER, "Expect property name after '.'."
+                )
+                expr = Expr.Get(expr, name)
             else:
                 break
 
@@ -212,6 +220,9 @@ class Parser:
 
         if self.match(TokenType.NIL):
             return Expr.Literal(None)
+
+        if self.match(TokenType.THIS):
+            return Expr.This(self.previous())
 
         if self.match(TokenType.IDENTIFIER):
             return Expr.Variable(self.previous())
@@ -276,6 +287,8 @@ class Parser:
 
     def declaration(self):
         try:
+            if self.match(TokenType.CLASS):
+                return self.classDeclaration()
             if self.match(TokenType.FUN):
                 return self.function("function")
             if self.match(TokenType.VAR):
@@ -284,6 +297,17 @@ class Parser:
         except ParseError:
             self.synchronize()
             return None
+
+    def classDeclaration(self):
+        name = self.consume(TokenType.IDENTIFIER, "Expect class name.")
+        self.consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
+        methods = []
+        while not self.check(TokenType.RIGHT_BRACE) and not self.isAtEnd():
+            methods.append(self.function("method"))
+
+        self.consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.")
+
+        return Stmt.Class(name, methods)
 
     def block(self):
         statements = []

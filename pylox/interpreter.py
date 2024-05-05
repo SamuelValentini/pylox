@@ -5,11 +5,13 @@ from StmtVisitor import StmtVisitor
 from loxCallable import LoxCallable
 from token import TokenType
 from token import Token
+from LoxClass import LoxClass
 from Return import ReturnValue
 
 import time
 
 from loxFunction import LoxFunction
+from LoxInstance import LoxInstance
 
 
 class Interpreter(ExprVisitor, StmtVisitor):
@@ -138,6 +140,18 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
         return self.evaluate(expr.right)
 
+    def visitSetExpr(self, expr):
+        obj = self.evaluate(expr.obj)
+        if not isinstance(obj, LoxInstance):
+            raise RuntimeError(expr.name, "Only instances have fields.")
+
+        value = self.evaluate(expr.value)
+        obj.set(expr.name, value)
+        return value
+
+    def visitThisExpr(self, expr):
+        return self.lookUpVariable(expr.keyword, expr)
+
     def visitGroupingExpr(self, expr):
         return self.evaluate(expr.expr)
 
@@ -170,7 +184,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
         return None
 
     def visitFunctionStmt(self, stmt):
-        function = LoxFunction(stmt, self.environment)
+        function = LoxFunction(stmt, self.environment, False)
         self.environment.define(stmt.name.lexeme, function)
         return None
 
@@ -206,6 +220,20 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def visitBlockStmt(self, stmt):
         self.executeBlock(stmt.statements, Environment(self.environment))
+        return None
+
+    def visitClassStmt(self, stmt):
+        self.environment.define(stmt.name.lexeme, None)
+
+        methods = {}
+        for method in stmt.methods:
+            function = LoxFunction(
+                method, self.environment, method.name.lexeme == "init"
+            )
+            methods[method.name.lexeme] = function
+        klass = LoxClass(stmt.name.lexeme, methods)
+
+        self.environment.assign(stmt.name, klass)
         return None
 
     def executeBlock(self, stmtList, environment):
@@ -249,3 +277,13 @@ class Interpreter(ExprVisitor, StmtVisitor):
             )
 
         return function.call(self, arguments)
+
+    def visitGetExpr(self, expr):
+        obj = self.evaluate(expr.obj)
+        if isinstance(obj, LoxInstance):
+            return obj.get(expr.name)
+
+        raise RuntimeError(
+            expr.name,
+            "Only instances have properties.",
+        )

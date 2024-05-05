@@ -3,12 +3,19 @@ from StmtVisitor import StmtVisitor
 from enum import Enum
 from enum import auto
 
-from pylox.errorHandler import ErrorHandler
+from LoxInstance import LoxInstance
 
 
 class FunctionType(Enum):
     NONE = auto()
     FUNCTION = auto()
+    INITIALIZER = auto()
+    METHOD = auto()
+
+
+class ClassType(Enum):
+    NONE = auto()
+    CLASS = auto()
 
 
 class Resolver(ExprVisitor, StmtVisitor):
@@ -17,11 +24,32 @@ class Resolver(ExprVisitor, StmtVisitor):
         self.errorHandler = errorHandler
         self.scopes = []
         self.currentFunction = FunctionType.NONE
+        self.currentClass = ClassType.NONE
 
     def visitBlockStmt(self, stmt):
         self.beginScope()
         self.resolve(stmt.statements)
         self.endScope()
+        return None
+
+    def visitClassStmt(self, stmt):
+        enclosingClass = self.currentClass
+        self.currentClass = ClassType.CLASS
+        self.declare(stmt.name)
+        self.define(stmt.name)
+
+        self.beginScope()
+        self.scopes[-1]["this"] = True
+
+        for method in stmt.methods:
+            declaration = FunctionType.METHOD
+            if method.name.lexeme == "init":
+                declaration = FunctionType.INITIALIZER
+            self.resolveFunction(method, declaration)
+
+        self.endScope()
+        self.currentClass = enclosingClass
+
         return None
 
     def visitExpressionStmt(self, stmt):
@@ -44,6 +72,10 @@ class Resolver(ExprVisitor, StmtVisitor):
             self.errorHandler.error(stmt.keyword, "Can't return from top-level code.")
 
         if stmt.value is not None:
+            if self.currentFunction == FunctionType.INITIALIZER:
+                self.errorHandler.error(
+                    stmt.keyword, "Can't return a value from an initializer."
+                )
             self.resolve(stmt.value)
         return None
 
@@ -92,6 +124,10 @@ class Resolver(ExprVisitor, StmtVisitor):
             self.resolve(argument)
         return None
 
+    def visitGetExpr(self, expr):
+        self.resolve(expr.obj)
+        return None
+
     def visitGroupingExpr(self, expr):
         self.resolve(expr.expression)
         return None
@@ -101,6 +137,20 @@ class Resolver(ExprVisitor, StmtVisitor):
 
     def visitLogicalExpr(self, expr):
         self.resolve(expr.right)
+        return None
+
+    def visitSetExpr(self, expr):
+        self.resolve(expr.value)
+        self.resolve(expr.obj)
+        return None
+
+    def visitThisExpr(self, expr):
+        if self.currentClass == ClassType.NONE:
+            self.errorHandler.error(
+                expr.keyword, "Can't use 'this' outside of a class."
+            )
+            return None
+        self.resolveLocal(expr, expr.keyword)
         return None
 
     def visitUnaryExpr(self, expr):
@@ -114,9 +164,9 @@ class Resolver(ExprVisitor, StmtVisitor):
         else:
             stmt.accept(self)
 
-    def resolveFunction(self, function, type_):
+    def resolveFunction(self, function, type):
         enclosingFunction = self.currentFunction
-        self.currentFunction = type_
+        self.currentFunction = type
         self.beginScope()
         for param in function.params:
             self.declare(param)
