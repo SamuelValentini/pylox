@@ -31,6 +31,10 @@ class ExprVisitor(ABC):
         pass
 
     @abstractmethod
+    def visitSuperExpr(self, expr):
+        pass
+
+    @abstractmethod
     def visitThisExpr(self, expr):
         pass
 

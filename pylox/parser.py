@@ -212,6 +212,14 @@ class Parser:
         if self.match(TokenType.STRING):
             return Expr.Literal(self.previous().literal)
 
+        if self.match(TokenType.SUPER):
+            keyword = self.previous()
+            self.consume(TokenType.DOT, "Expect '.' after 'super'.")
+            method = self.consume(
+                TokenType.IDENTIFIER, "Expect superclass method name."
+            )
+            return Expr.Super(keyword, method)
+
         if self.match(TokenType.TRUE):
             return Expr.Literal(True)
 
@@ -300,6 +308,10 @@ class Parser:
 
     def classDeclaration(self):
         name = self.consume(TokenType.IDENTIFIER, "Expect class name.")
+        superclass = None
+        if self.match(TokenType.LESS):
+            self.consume(TokenType.IDENTIFIER, "Expect superclass name")
+            superclass = Expr.Variable(self.previous())
         self.consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
         methods = []
         while not self.check(TokenType.RIGHT_BRACE) and not self.isAtEnd():
@@ -307,7 +319,7 @@ class Parser:
 
         self.consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.")
 
-        return Stmt.Class(name, methods)
+        return Stmt.Class(name, superclass, methods)
 
     def block(self):
         statements = []

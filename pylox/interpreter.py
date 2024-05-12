@@ -1,3 +1,4 @@
+from os import environ
 from Expr import Expr
 from environment import Environment
 from ExprVisitor import ExprVisitor
@@ -78,7 +79,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
             return True
         if a is None:
             return False
-        return a is b
+        return a == b
 
     def checkNumberOperand(self, operator, operand, other=1.0):
         # Hacky way! In this way you can use the same function
@@ -223,7 +224,18 @@ class Interpreter(ExprVisitor, StmtVisitor):
         return None
 
     def visitClassStmt(self, stmt):
+        superclass = None
+
+        if stmt.superclass is not None:
+            superclass = self.evaluate(stmt.superclass)
+            if not isinstance(superclass, LoxClass):
+                raise RuntimeError(stmt.superclass.name, "Superclass must be a class.")
+
         self.environment.define(stmt.name.lexeme, None)
+
+        if stmt.superclass is not None:
+            self.environment = Environment(self.environment)
+            self.environment.define("super", superclass)
 
         methods = {}
         for method in stmt.methods:
@@ -231,7 +243,10 @@ class Interpreter(ExprVisitor, StmtVisitor):
                 method, self.environment, method.name.lexeme == "init"
             )
             methods[method.name.lexeme] = function
-        klass = LoxClass(stmt.name.lexeme, methods)
+        klass = LoxClass(stmt.name.lexeme, superclass, methods)
+
+        if superclass is not None:
+            self.environment = self.environment.enclosing
 
         self.environment.assign(stmt.name, klass)
         return None
@@ -287,3 +302,15 @@ class Interpreter(ExprVisitor, StmtVisitor):
             expr.name,
             "Only instances have properties.",
         )
+
+    def visitSuperExpr(self, expr):
+        distance = self.locals[expr]
+        superclass = self.environment.getAt(distance, "super")
+        obj = self.environment.getAt(distance - 1, "this")
+
+        method = superclass.findMethod(expr.method.lexeme)
+        if method is None:
+            raise RuntimeError(
+                expr.method, f"Undefinied property '{expr.method.lexeme}'."
+            )
+        return method.bind(obj)

@@ -16,6 +16,7 @@ class FunctionType(Enum):
 class ClassType(Enum):
     NONE = auto()
     CLASS = auto()
+    SUBCLASS = auto()
 
 
 class Resolver(ExprVisitor, StmtVisitor):
@@ -38,6 +39,20 @@ class Resolver(ExprVisitor, StmtVisitor):
         self.declare(stmt.name)
         self.define(stmt.name)
 
+        if (
+            stmt.superclass is not None
+            and stmt.name.lexeme == stmt.superclass.name.lexeme
+        ):
+            self.errorHandler.error(
+                stmt.superclass.name.line, "A class can't inherit from itself"
+            )
+
+        if stmt.superclass is not None:
+            self.currentClass = ClassType.SUBCLASS
+            self.resolve(stmt.superclass)
+            self.beginScope()
+            self.scopes[-1]["super"] = True
+
         self.beginScope()
         self.scopes[-1]["this"] = True
 
@@ -48,6 +63,10 @@ class Resolver(ExprVisitor, StmtVisitor):
             self.resolveFunction(method, declaration)
 
         self.endScope()
+
+        if stmt.superclass is not None:
+            self.endScope()
+
         self.currentClass = enclosingClass
 
         return None
@@ -69,12 +88,14 @@ class Resolver(ExprVisitor, StmtVisitor):
 
     def visitReturnStmt(self, stmt):
         if self.currentFunction == FunctionType.NONE:
-            self.errorHandler.error(stmt.keyword, "Can't return from top-level code.")
+            self.errorHandler.error(
+                stmt.keyword.line, "Can't return from top-level code."
+            )
 
         if stmt.value is not None:
             if self.currentFunction == FunctionType.INITIALIZER:
                 self.errorHandler.error(
-                    stmt.keyword, "Can't return a value from an initializer."
+                    stmt.keyword.line, "Can't return a value from an initializer."
                 )
             self.resolve(stmt.value)
         return None
@@ -129,7 +150,7 @@ class Resolver(ExprVisitor, StmtVisitor):
         return None
 
     def visitGroupingExpr(self, expr):
-        self.resolve(expr.expression)
+        self.resolve(expr.expr)
         return None
 
     def visitLiteralExpr(self, expr):
@@ -144,10 +165,22 @@ class Resolver(ExprVisitor, StmtVisitor):
         self.resolve(expr.obj)
         return None
 
+    def visitSuperExpr(self, expr):
+        if self.currentClass == ClassType.NONE:
+            self.errorHandler.error(
+                expr.keyword.line, "Can't use 'super' outside of a class."
+            )
+        elif self.currentClass != ClassType.SUBCLASS:
+            self.errorHandler.error(
+                expr.keyword.line, "Can't use 'super' in a class with no superclass."
+            )
+        self.resolveLocal(expr, expr.keyword)
+        return None
+
     def visitThisExpr(self, expr):
         if self.currentClass == ClassType.NONE:
             self.errorHandler.error(
-                expr.keyword, "Can't use 'this' outside of a class."
+                expr.keyword.line, "Can't use 'this' outside of a class."
             )
             return None
         self.resolveLocal(expr, expr.keyword)
