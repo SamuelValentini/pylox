@@ -23,7 +23,7 @@ class Environment:
 
         if not isinstance(var, list):
             raise RuntimeError(name, f"{name.lexeme} not an array.")
-        elif pos < len(var):
+        elif pos >= 0 and pos < len(var):
             return var[pos]
         else:
             raise RuntimeError(name, f"Array position out of bound {name.lexeme}.")
@@ -37,7 +37,7 @@ class Environment:
 
         if not isinstance(var, list):
             raise RuntimeError(name, f"{name.lexeme} is not an array.")
-        elif pos < len(var):
+        elif pos >= 0 and pos < len(var):
             var[pos] = value
         else:
             raise RuntimeError(name, f"Array position out of bound {name.lexeme}.")
@@ -50,7 +50,7 @@ class Environment:
                 var = self.values[name.lexeme]
                 if not isinstance(var, list):
                     raise RuntimeError(name, f"{name.lexeme} is not an array.")
-                elif pos < len(var):
+                elif pos >= 0 and pos < len(var):
                     return var[pos]
                 else:
                     raise RuntimeError(
@@ -71,7 +71,7 @@ class Environment:
                 var = self.values[name.lexeme]
                 if not isinstance(var, list):
                     raise RuntimeError(name, f"{name.lexeme} is not an array.")
-                elif pos < len(var):
+                elif pos >= 0 and pos < len(var):
                     var[pos] = value
                 else:
                     raise RuntimeError(
