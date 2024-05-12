@@ -26,7 +26,7 @@ class Environment:
         elif pos < len(var):
             return var[pos]
         else:
-            raise RuntimeError(name, f"Array out of bound {name.lexeme}.")
+            raise RuntimeError(name, f"Array position out of bound {name.lexeme}.")
 
     def assignAt(self, distance, name, value, pos=None):
         if pos is None:
@@ -36,11 +36,11 @@ class Environment:
         var = self.ancestor(distance).values[name.lexeme]
 
         if not isinstance(var, list):
-            raise RuntimeError(name, f"{name.lexeme} not an array.")
+            raise RuntimeError(name, f"{name.lexeme} is not an array.")
         elif pos < len(var):
             var[pos] = value
         else:
-            raise RuntimeError(name, f"Array out of bound {name.lexeme}.")
+            raise RuntimeError(name, f"Array position out of bound {name.lexeme}.")
 
     def get(self, name, pos=None):
         if name.lexeme in self.values:
@@ -49,11 +49,13 @@ class Environment:
             else:
                 var = self.values[name.lexeme]
                 if not isinstance(var, list):
-                    raise RuntimeError(name, f"{name.lexeme} not an array.")
+                    raise RuntimeError(name, f"{name.lexeme} is not an array.")
                 elif pos < len(var):
                     return var[pos]
                 else:
-                    raise RuntimeError(name, f"Array out of bound {name.lexeme}.")
+                    raise RuntimeError(
+                        name, f"Array position out of bound {name.lexeme}."
+                    )
 
         if self.enclosing is not None:
             return self.enclosing.get(name, pos)
@@ -68,11 +70,13 @@ class Environment:
             else:
                 var = self.values[name.lexeme]
                 if not isinstance(var, list):
-                    raise RuntimeError(name, f"{name.lexeme} not an array.")
+                    raise RuntimeError(name, f"{name.lexeme} is not an array.")
                 elif pos < len(var):
                     var[pos] = value
                 else:
-                    raise RuntimeError(name, f"Array out of bound {name.lexeme}.")
+                    raise RuntimeError(
+                        name, f"Array position out of bound {name.lexeme}."
+                    )
                 return None
 
         if self.enclosing is not None:

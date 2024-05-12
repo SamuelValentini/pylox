@@ -179,7 +179,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
                 pos = int(self.evaluate(expr.pos))
             except ValueError:
                 raise RuntimeError(
-                    expr.name, "Array position must evaluate to integers."
+                    expr.name, "Array position must evaluate to an integer."
                 )
 
         return self.lookUpVariable(expr.name, expr, pos)
@@ -221,7 +221,9 @@ class Interpreter(ExprVisitor, StmtVisitor):
             try:
                 length = int(self.evaluate(stmt.length))
             except TypeError:
-                raise RuntimeError(length, "Array position must evaluate to integers.")
+                raise RuntimeError(
+                    length, "Array position must evaluate to an integer."
+                )
 
         if length == 0:
             self.environment.define(stmt.name.lexeme, value)
@@ -237,7 +239,9 @@ class Interpreter(ExprVisitor, StmtVisitor):
             try:
                 pos = int(self.evaluate(expr.pos))
             except TypeError:
-                raise RuntimeError(length, "Array position must evaluate to integers.")
+                raise RuntimeError(
+                    length, "Array position must evaluate to an integer."
+                )
         try:
             distance = self.locals[expr]
             self.environment.assignAt(distance, expr.name, value, pos)

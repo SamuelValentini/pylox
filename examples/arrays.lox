@@ -1,0 +1,25 @@
+fun square(n)
+  {
+      return n * n;
+    }
+
+var a[5] = 10;
+print(a[2] * a[3]);
+
+var b = 2;
+
+a[b] = b + 5;
+print(a[b]);
+
+for(var i = 0; i < 5; i = i + 1)
+{
+ a[i] = square(i * 2);
+}
+
+
+for(var i = 0; i < 5; i = i + 1)
+{
+   print(a[i]);
+}
+
+// print(a[10]) out of bound
