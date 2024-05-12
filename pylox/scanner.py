@@ -172,7 +172,7 @@ class Scanner:
         self.addToken(TokenType.NUMBER, literal=value)
 
     def identifier(self):
-        while self.peek().isalnum():
+        while self.peek().isalnum() or self.peek() == "_":
             self.advance()
 
         text = self.source[self.start : self.current]
