@@ -1,0 +1,24 @@
+class Rectangle {
+  init(h, w) {
+    this.h  = h;
+    this.w   = w;
+  }
+  perimeter()    { return 2 * (this.h + this.w); }
+  area() { return this.h * this.w; }
+}
+
+var r = Rectangle(2, 4);
+print(r.perimeter());
+print(r.area());
+
+class Square < Rectangle{
+  init(w) {
+    super.init(w,w);
+  }
+  perimeter()    { return super.perimeter(); }
+  area() { return this.w * this.w; }
+}
+
+var s = Square(2);
+print(s.perimeter());
+print(s.area());

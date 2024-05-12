@@ -1,0 +1,13 @@
+var a = 4;
+var b = 5;
+print a + b;
+
+var c = "Hello";
+var d = "World!";
+print c + " " + d;
+
+var e = true;
+print e;
+
+var f = nil;
+print f;
