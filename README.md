@@ -1,8 +1,10 @@
 Yet another implementation of a lox interpreter
 
+A lox implementation extended with fixed arrays is available on the branch array
+
 # pylox
 
-To fire it up:
+To start it:
 ```
 $python3 lox.py 
 > var num = 4;
@@ -18,6 +20,7 @@ You can find some examples in the examples folder
 var a = 4;
 var b = 5;
 print a + b;
+9
 
 var c = "Hello";
 var d = "World!";
