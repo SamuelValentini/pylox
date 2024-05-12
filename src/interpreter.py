@@ -55,6 +55,8 @@ class Interpreter(ExprVisitor, StmtVisitor):
                 return "true"
             else:
                 return "false"
+        elif isinstance(object, list):
+            return str([self.stringify(x) for x in object])
         else:
             return str(object)
 
@@ -171,17 +173,18 @@ class Interpreter(ExprVisitor, StmtVisitor):
         return None
 
     def visitVariableExpr(self, expr):
-        return self.lookUpVariable(expr.name, expr)
-
-    def lookUpVariable(self, name, expr):
         pos = None
-        if isinstance(expr, Expr.Variable) and expr.pos is not None:
+        if expr.pos is not None:
             try:
-                pos = int(expr.pos.value)
+                pos = int(self.evaluate(expr.pos))
             except ValueError:
                 raise RuntimeError(
                     expr.name, "Array position must evaluate to integers."
                 )
+
+        return self.lookUpVariable(expr.name, expr, pos)
+
+    def lookUpVariable(self, name, expr, pos=None):
         try:
             distance = self.locals[expr]
             return self.environment.getAt(distance, name.lexeme, pos)
@@ -229,11 +232,17 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def visitAssignmentExpr(self, expr):
         value = self.evaluate(expr.value)
+        pos = None
+        if expr.pos is not None:
+            try:
+                pos = int(self.evaluate(expr.pos))
+            except TypeError:
+                raise RuntimeError(length, "Array position must evaluate to integers.")
         try:
             distance = self.locals[expr]
-            self.environment.assignAt(distance, expr.name, value)
+            self.environment.assignAt(distance, expr.name, value, pos)
         except KeyError:
-            self.globals.assign(expr.name, value)
+            self.globals.assign(expr.name, value, pos)
 
         return value
 

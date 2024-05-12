@@ -24,12 +24,23 @@ class Environment:
         if not isinstance(var, list):
             raise RuntimeError(name, f"{name.lexeme} not an array.")
         elif pos < len(var):
-            return self.ancestor(distance).values[pos]
+            return var[pos]
         else:
             raise RuntimeError(name, f"Array out of bound {name.lexeme}.")
 
-    def assignAt(self, distance, name, value):
-        self.ancestor(distance).values[name.lexeme] = value
+    def assignAt(self, distance, name, value, pos=None):
+        if pos is None:
+            self.ancestor(distance).values[name.lexeme] = value
+            return None
+
+        var = self.ancestor(distance).values[name.lexeme]
+
+        if not isinstance(var, list):
+            raise RuntimeError(name, f"{name.lexeme} not an array.")
+        elif pos < len(var):
+            var[pos] = value
+        else:
+            raise RuntimeError(name, f"Array out of bound {name.lexeme}.")
 
     def get(self, name, pos=None):
         if name.lexeme in self.values:
@@ -49,10 +60,20 @@ class Environment:
 
         raise RuntimeError(name, f"Undefined variable {name.lexeme}.")
 
-    def assign(self, name, value):
+    def assign(self, name, value, pos=None):
         if name.lexeme in self.values:
-            self.values[name.lexeme] = value
-            return None
+            if pos is None:
+                self.values[name.lexeme] = value
+                return None
+            else:
+                var = self.values[name.lexeme]
+                if not isinstance(var, list):
+                    raise RuntimeError(name, f"{name.lexeme} not an array.")
+                elif pos < len(var):
+                    var[pos] = value
+                else:
+                    raise RuntimeError(name, f"Array out of bound {name.lexeme}.")
+                return None
 
         if self.enclosing is not None:
             self.enclosing.assign(name, value)

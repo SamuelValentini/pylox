@@ -104,7 +104,8 @@ class Parser:
 
             if isinstance(expr, Expr.Variable):
                 name = expr.name
-                return Expr.Assignment(name, value)
+                pos = expr.pos
+                return Expr.Assignment(name, pos, value)
             elif isinstance(expr, Expr.Get):
                 get = expr
                 return Expr.Set(get.obj, get.name, value)

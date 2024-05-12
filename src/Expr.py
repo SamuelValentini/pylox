@@ -107,8 +107,9 @@ class Variable(Expr):
 
 
 class Assignment(Expr):
-    def __init__(self, name, value):
+    def __init__(self, name, pos, value):
         self.name = name
+        self.pos = pos
         self.value = value
 
     def accept(self, visitor):

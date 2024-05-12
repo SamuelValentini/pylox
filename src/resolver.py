@@ -117,11 +117,16 @@ class Resolver(ExprVisitor, StmtVisitor):
         if stmt.initializer is not None:
             self.resolve(stmt.initializer)
 
+        if stmt.length is not None:
+            self.resolve(stmt.length)
+
         self.define(stmt.name)
         return None
 
     def visitAssignmentExpr(self, expr):
         self.resolve(expr.value)
+        if expr.pos is not None:
+            self.resolve(expr.pos)
         self.resolveLocal(expr, expr.name)
         return None
 
@@ -130,6 +135,10 @@ class Resolver(ExprVisitor, StmtVisitor):
             self.errorHandler.error(
                 expr.name, "Can't read local variable in its own initializer."
             )
+
+        if expr.pos is not None:
+            self.resolve(expr.pos)
+
         self.resolveLocal(expr, expr.name)
         return None
 
