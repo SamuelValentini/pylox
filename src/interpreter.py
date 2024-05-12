@@ -1,5 +1,5 @@
 from os import environ
-from Expr import Expr
+import Expr as Expr
 from environment import Environment
 from ExprVisitor import ExprVisitor
 from StmtVisitor import StmtVisitor
@@ -174,11 +174,19 @@ class Interpreter(ExprVisitor, StmtVisitor):
         return self.lookUpVariable(expr.name, expr)
 
     def lookUpVariable(self, name, expr):
+        pos = None
+        if isinstance(expr, Expr.Variable) and expr.pos is not None:
+            try:
+                pos = int(expr.pos.value)
+            except ValueError:
+                raise RuntimeError(
+                    expr.name, "Array position must evaluate to integers."
+                )
         try:
             distance = self.locals[expr]
-            return self.environment.getAt(distance, name.lexeme)
+            return self.environment.getAt(distance, name.lexeme, pos)
         except KeyError:
-            return self.globals.get(name)
+            return self.globals.get(name, pos)
 
     def visitExpressionStmt(self, stmt):
         self.evaluate(stmt.expression)
@@ -207,16 +215,15 @@ class Interpreter(ExprVisitor, StmtVisitor):
         if stmt.initializer is not None:
             value = self.evaluate(stmt.initializer)
         if stmt.length is not None:
-            length = int(self.evaluate(stmt.length))
-            ##TODO IMPLEMENT CHECK FOR INT
+            try:
+                length = int(self.evaluate(stmt.length))
+            except TypeError:
+                raise RuntimeError(length, "Array position must evaluate to integers.")
 
         if length == 0:
             self.environment.define(stmt.name.lexeme, value)
         else:
             self.environment.define(stmt.name.lexeme, [value] * length)
-
-        print(self.environment.values)
-        quit()
 
         return None
 

@@ -233,7 +233,12 @@ class Parser:
             return Expr.This(self.previous())
 
         if self.match(TokenType.IDENTIFIER):
-            return Expr.Variable(self.previous())
+            var = self.previous()
+            pos = None
+            if self.match(TokenType.LEFT_BRACKET):
+                pos = self.expression()
+                self.consume(TokenType.RIGHT_BRACKET, "Expect ']' after array position")
+            return Expr.Variable(var, pos)
 
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
@@ -316,7 +321,7 @@ class Parser:
         superclass = None
         if self.match(TokenType.LESS):
             self.consume(TokenType.IDENTIFIER, "Expect superclass name")
-            superclass = Expr.Variable(self.previous())
+            superclass = Expr.Variable(self.previous(), None)
         self.consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
         methods = []
         while not self.check(TokenType.RIGHT_BRACE) and not self.isAtEnd():
