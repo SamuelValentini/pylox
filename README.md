@@ -13,11 +13,37 @@ python3 lox.py <program>
 ```
 You can find some examples in the examples folder
 
+## Arrays
+
+```
+var a[5] = 10;
+print(a[2] * a[3]);
+100
+
+var b = 2;
+
+a[b] = b + 5;
+print(a[b]);
+7
+
+for(var i = 0; i < 5; i = i + 1)
+{
+ a[i] = i * 2;
+ print(a[i])
+}
+0
+2
+4
+6
+8
+```
+
 ## Variables
 ```
 var a = 4;
 var b = 5;
 print a + b;
+9
 
 var c = "Hello";
 var d = "World!";
