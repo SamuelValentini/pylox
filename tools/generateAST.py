@@ -8,6 +8,7 @@ exprAST = (
         "Literal": ("value",),
         "Logical": ("left", "operator", "right"),
         "Set": ("obj", "name", "value"),
+        "Super": ("keyword", "method"),
         "This": ("keyword",),
         "Unary": ("operator", "right"),
         "Variable": ("name",),
@@ -28,7 +29,7 @@ stmtAST = (
         ),
         "While": ("condition", "body"),
         "Block": ("statements",),
-        "Class": ("name", "methods"),
+        "Class": ("name", "superclass", "methods"),
         "If": ("condition", "thenBranch", "elseBranch"),
     },
 )
