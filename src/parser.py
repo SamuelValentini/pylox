@@ -263,13 +263,18 @@ class Parser:
 
     def varDeclaration(self):
         name = self.consume(TokenType.IDENTIFIER, "Expect variable name.")
+        lenght = None
+
+        if self.match(TokenType.LEFT_BRACKET):
+            lenght = self.expression()
+            self.consume(TokenType.RIGHT_BRACKET, "Expect ']' after lenght")
 
         initializer = None
         if self.match(TokenType.EQUAL):
             initializer = self.expression()
 
         self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
-        return Stmt.Var(name, initializer)
+        return Stmt.Var(name, lenght, initializer)
 
     def function(self, kind):
         name = self.consume(TokenType.IDENTIFIER, f"Expect {kind} name.")

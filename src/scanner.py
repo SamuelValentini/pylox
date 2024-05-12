@@ -50,6 +50,10 @@ class Scanner:
                 self.addToken(TokenType.LEFT_PAREN)
             case ")":
                 self.addToken(TokenType.RIGHT_PAREN)
+            case "[":
+                self.addToken(TokenType.LEFT_BRACKET)
+            case "]":
+                self.addToken(TokenType.RIGHT_BRACKET)
             case "{":
                 self.addToken(TokenType.LEFT_BRACE)
             case "}":

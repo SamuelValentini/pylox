@@ -1,6 +1,7 @@
 from enum import Enum
 from enum import auto
 
+
 class Token:
     def __init__(self, type, lexeme, literal, line):
         self.type = type
@@ -11,10 +12,13 @@ class Token:
     def __str__(self) -> str:
         return f"{self.type} {self.lexeme} {self.literal}"
 
+
 class TokenType(Enum):
-    #Single-character tokens.
+    # Single-character tokens.
     LEFT_PAREN = auto()
     RIGHT_PAREN = auto()
+    LEFT_BRACKET = auto()
+    RIGHT_BRACKET = auto()
     LEFT_BRACE = auto()
     RIGHT_BRACE = auto()
     COMMA = auto()
@@ -25,7 +29,7 @@ class TokenType(Enum):
     SLASH = auto()
     STAR = auto()
 
-    #One or two character tokens.
+    # One or two character tokens.
     BANG = auto()
     BANG_EQUAL = auto()
     EQUAL = auto()
@@ -35,12 +39,12 @@ class TokenType(Enum):
     LESS = auto()
     LESS_EQUAL = auto()
 
-    #Literals.
+    # Literals.
     IDENTIFIER = auto()
     STRING = auto()
     NUMBER = auto()
 
-    #Keywords.
+    # Keywords.
     AND = auto()
     CLASS = auto()
     ELSE = auto()

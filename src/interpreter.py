@@ -203,10 +203,21 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def visitVarStmt(self, stmt):
         value = None
+        length = 0
         if stmt.initializer is not None:
             value = self.evaluate(stmt.initializer)
+        if stmt.length is not None:
+            length = int(self.evaluate(stmt.length))
+            ##TODO IMPLEMENT CHECK FOR INT
 
-        self.environment.define(stmt.name.lexeme, value)
+        if length == 0:
+            self.environment.define(stmt.name.lexeme, value)
+        else:
+            self.environment.define(stmt.name.lexeme, [value] * length)
+
+        print(self.environment.values)
+        quit()
+
         return None
 
     def visitAssignmentExpr(self, expr):
